@@ -1,16 +1,12 @@
 spring:
-  application:
-    name: E-comm
-
   datasource:
-    url: jdbc:mysql://localhost:3306/ecom_db
-    username: root
-    password: Az2003=Me#21
-
+    url: jdbc:postgresql://db.skzwcjokvhkzynggvame.supabase.co:5432/postgres?sslmode=require
+    username: postgres
+    password: Ux/c!zf8p.BW#jD
   jpa:
     hibernate:
       ddl-auto: update
-      show-sql: true
+    show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
