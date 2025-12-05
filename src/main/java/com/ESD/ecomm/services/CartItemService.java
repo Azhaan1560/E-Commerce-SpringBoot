@@ -37,5 +37,9 @@ public class CartItemService {
     public boolean existsInCart(Cart cart, Product product) {
         return cartItemRepository.existsByCartAndProduct(cart, product);
     }
+
+    public List<Cart_Items> getAllCartItems() {return cartItemRepository.findAll();
+    }
+
 }
 

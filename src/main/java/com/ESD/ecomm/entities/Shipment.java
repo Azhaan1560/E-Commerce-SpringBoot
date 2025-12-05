@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="shipments",
         indexes = {
-                @Index(name="idx_order", columnList="order_id"),
-                @Index(name="idx_tracking", columnList="tracking_number"),
-                @Index(name="idx_status", columnList="shipment_status")
+                @Index(name="ship_idx_order", columnList="order_id"),
+                @Index(name="ship_idx_tracking", columnList="tracking_number"),
+                @Index(name="ship_idx_status", columnList="shipment_status")
         })
 @Getter
 @Setter

@@ -10,10 +10,10 @@ import com.ESD.ecomm.enums.OrderStatus;
 @Entity
 @Table(name="orders",
         indexes = {
-                @Index(name="idx_user", columnList="user_id"),
-                @Index(name="idx_order_number", columnList="order_number"),
-                @Index(name="idx_status", columnList="order_status"),
-                @Index(name="idx_created", columnList="created_at")
+                @Index(name="orders_idx_user", columnList="user_id"),
+                @Index(name="orders_idx_order_number", columnList="order_number"),
+                @Index(name="orders_idx_status", columnList="order_status"),
+                @Index(name="orders_idx_created", columnList="created_at")
         })
 @Getter
 @Setter

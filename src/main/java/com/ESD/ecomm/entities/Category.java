@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 @Table(
         name = "categories",
         indexes = {
-                @Index(name = "idx_slug", columnList = "slug"),
-                @Index(name = "idx_parent", columnList = "parent_category_id"),
-                @Index(name = "idx_active", columnList = "is_active")
+                @Index(name = "cat_idx_slug", columnList = "slug"),
+                @Index(name = "cat_idx_parent", columnList = "parent_category_id"),
+                @Index(name = "cat_dx_active", columnList = "is_active")
         }
 )
 @Getter

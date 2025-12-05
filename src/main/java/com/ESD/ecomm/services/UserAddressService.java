@@ -37,8 +37,11 @@ public class UserAddressService {
     public List<UserAddress> getAddressesByType(User user, AddressType addressType) {
         return userAddressRepository.findByUserAndAddressType(user, addressType);
     }
-
+    public Optional<UserAddress> getAddressById(Long id) {
+        return userAddressRepository.findById(id);
+    }
     public void deleteAddress(UserAddress address) {
         userAddressRepository.delete(address);
     }
+
 }

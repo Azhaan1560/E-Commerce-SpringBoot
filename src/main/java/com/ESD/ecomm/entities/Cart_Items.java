@@ -12,8 +12,8 @@ import jakarta.validation.constraints.Min;
         @UniqueConstraint(name="unique_cart_product",columnNames = {"cart_id","product_id"})
        },
         indexes = {
-            @Index(name="idx_cart",columnList = "cart_id"),
-            @Index(name="idx_product",columnList = "product_id")
+            @Index(name="ci_idx_cart",columnList = "cart_id"),
+            @Index(name="ci_idx_product",columnList = "product_id")
         })
 @Getter
 @Setter

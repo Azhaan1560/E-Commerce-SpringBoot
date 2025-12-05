@@ -9,7 +9,7 @@ import java.util.List;
 @Entity
 @Table(name="Carts",
         indexes = {
-            @Index(name="idx_user",columnList = "user_id")
+            @Index(name="carts_idx_user",columnList = "user_id")
         })
 @Getter
 @Setter

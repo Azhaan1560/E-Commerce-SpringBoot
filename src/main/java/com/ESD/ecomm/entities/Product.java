@@ -3,15 +3,16 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+import java.util.ArrayList;
+import java.util.List;
 @Entity
 @Table(name="Products",
         indexes = {
-            @Index(name="idx_sku",columnList = "sku"),
-            @Index(name="idx_active",columnList = "is_active"),
-            @Index(name="idx_featured",columnList="is_featured"),
-            @Index(name="idx_price",columnList ="prod_price"),
-            @Index(name="idx_stock",columnList = "stock_quantity")
+            @Index(name="prod_idx_sku",columnList = "sku"),
+            @Index(name="prod_idx_active",columnList = "is_active"),
+            @Index(name="prod_idx_featured",columnList="is_featured"),
+            @Index(name="prod_idx_price",columnList ="prod_price"),
+            @Index(name="prod_idx_stock",columnList = "stock_quantity")
         })
 @Getter
 @Setter
@@ -69,6 +70,14 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_tag_mappings",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Product_Tags> tags = new ArrayList<>();
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

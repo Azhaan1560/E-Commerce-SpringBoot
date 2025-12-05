@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="reviews",
         indexes = {
-                @Index(name="idx_product", columnList="product_id"),
-                @Index(name="idx_user", columnList="user_id"),
-                @Index(name="idx_approved", columnList="is_approved"),
-                @Index(name="idx_rating", columnList="rating")
+                @Index(name="reviews_idx_product", columnList="product_id"),
+                @Index(name="reviews_idx_user", columnList="user_id"),
+                @Index(name="reviews_idx_approved", columnList="is_approved"),
+                @Index(name="reviews_idx_rating", columnList="rating")
         })
 @Getter
 @Setter

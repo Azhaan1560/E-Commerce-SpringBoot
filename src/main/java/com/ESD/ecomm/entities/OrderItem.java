@@ -9,8 +9,8 @@ import jakarta.validation.constraints.Min;
 @Entity
 @Table(name = "order_items",
         indexes = {
-                @Index(name = "idx_order", columnList = "order_id"),
-                @Index(name = "idx_product", columnList = "product_id")
+                @Index(name = "oi_idx_order", columnList = "order_id"),
+                @Index(name = "oi_idx_product", columnList = "product_id")
         }
 )
 @Getter

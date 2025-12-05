@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="Users",
         indexes={
-            @Index(name="idx_email",columnList="email"),
-            @Index(name="idx_username",columnList="username")
+            @Index(name="users_idx_email",columnList="email"),
+            @Index(name="users_idx_username",columnList="username")
         })
 @Getter
 @Setter
@@ -47,10 +47,10 @@ public class User {
     private String phoneNumber;
 
     @Column(name="is_active")
-    private boolean isActive=true; // Default values set in Java to ensure new User objects have proper initial state
+    private boolean active=true; // Default values set in Java to ensure new User objects have proper initial state
                                    //Otherwise NULL will be sent to DB which will cause issue when creating new users
     @Column(name="is_email_verified")
-    private boolean isEmailVerified=false;
+    private boolean emailVerified=false;
 
     @Column(name="created_at")
     private LocalDateTime createdAt;
