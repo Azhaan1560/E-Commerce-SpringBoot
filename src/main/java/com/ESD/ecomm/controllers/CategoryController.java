@@ -24,9 +24,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // -----------------------------------------------------
-    // ✔ CREATE CATEGORY
-    // -----------------------------------------------------
+    // CREATE CATEGORY
     @PostMapping
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryRequestDTO dto) {
         if (categoryService.existsByName(dto.getName())) {
@@ -39,9 +37,7 @@ public class CategoryController {
         return ResponseEntity.ok(CategoryMappers.toCategoryResponseDTO(category));
     }
 
-    // -----------------------------------------------------
-    // ✔ GET ALL CATEGORIES
-    // -----------------------------------------------------
+    // GET ALL CATEGORIES
     @GetMapping
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
         List<CategoryResponseDTO> categories = categoryService.getAllCategories()
@@ -51,9 +47,7 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
-    // -----------------------------------------------------
-    // ✔ GET ACTIVE CATEGORIES
-    // -----------------------------------------------------
+    // GET ACTIVE CATEGORIES
     @GetMapping("/active")
     public ResponseEntity<List<CategoryResponseDTO>> getActiveCategories() {
         List<CategoryResponseDTO> categories = categoryService.getActiveCategories()
@@ -63,9 +57,7 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
-    // -----------------------------------------------------
-    // ✔ GET CATEGORY BY ID
-    // -----------------------------------------------------
+    // GET CATEGORY BY ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getCategoryById(@PathVariable Long id) {
         Optional<Category> categoryOpt = categoryService.getCategoryById(id);
@@ -74,9 +66,7 @@ public class CategoryController {
         return ResponseEntity.ok(CategoryMappers.toCategoryResponseDTO(categoryOpt.get()));
     }
 
-    // -----------------------------------------------------
-    // ✔ UPDATE CATEGORY
-    // -----------------------------------------------------
+    // UPDATE CATEGORY
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCategory(
             @PathVariable Long id,
@@ -92,9 +82,7 @@ public class CategoryController {
         return ResponseEntity.ok(CategoryMappers.toCategoryResponseDTO(category));
     }
 
-    // -----------------------------------------------------
-    // ✔ DELETE CATEGORY
-    // -----------------------------------------------------
+    // DELETE CATEGORY
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
         Optional<Category> categoryOpt = categoryService.getCategoryById(id);
@@ -104,9 +92,7 @@ public class CategoryController {
         return ResponseEntity.ok("Category deleted successfully");
     }
 
-    // -----------------------------------------------------
-    // ✔ GET SUBCATEGORIES
-    // -----------------------------------------------------
+    // GET SUBCATEGORIES
     @GetMapping("/{id}/subcategories")
     public ResponseEntity<List<CategoryResponseDTO>> getSubcategories(@PathVariable Long id) {
         Optional<Category> parentOpt = categoryService.getCategoryById(id);
@@ -120,9 +106,7 @@ public class CategoryController {
         return ResponseEntity.ok(subcategories);
     }
 
-    // -----------------------------------------------------
-    // ✔ CHECK NAME EXISTS
-    // -----------------------------------------------------
+    // CHECK NAME EXISTS
     @GetMapping("/exists")
     public ResponseEntity<?> existsByName(@RequestParam String name) {
         return ResponseEntity.ok(categoryService.existsByName(name));

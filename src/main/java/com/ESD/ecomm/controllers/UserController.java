@@ -2,15 +2,17 @@ package com.ESD.ecomm.controllers;
 
 import com.ESD.ecomm.dto.user.*;
 import com.ESD.ecomm.entities.User;
+import com.ESD.ecomm.exception.ResourceNotFoundException;
 import com.ESD.ecomm.mappers.UserMappers;
 import com.ESD.ecomm.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -18,57 +20,17 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    // -----------------------------------------------------
-    // ✔ REGISTER USER
-    // -----------------------------------------------------
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationDTO dto) {
-
-        if (userService.existsByEmail(dto.getEmail())) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }
-        if (userService.existsByUsername(dto.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
-
-        User user = UserMappers.toUser(dto);
-        userService.saveUser(user);
-
-        return ResponseEntity.ok(UserMappers.toUserResponseDTO(user));
-    }
-
-    // -----------------------------------------------------
-    // ✔ LOGIN
-    // -----------------------------------------------------
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@Valid @RequestBody UserLoginDTO dto) {
-
-        Optional<User> userOpt = userService.getUserByEmail(dto.getEmail());
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(401).body("Invalid email or password");
-        }
-
-        User user = userOpt.get();
-
-        // NOTE: In real production → compare hashed passwords
-        if (!user.getPassword().equals(dto.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid email or password");
-        }
-
-        return ResponseEntity.ok(UserMappers.toUserResponseDTO(user));
-    }
-
-    // -----------------------------------------------------
-    // ✔ GET ALL USERS
-    // -----------------------------------------------------
+    // GET ALL USERS (Admin only)
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         List<UserResponseDTO> users = userService.getAllUsers()
                 .stream()
@@ -78,71 +40,60 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // -----------------------------------------------------
-    // ✔ GET USER BY ID
-    // -----------------------------------------------------
+    // GET USER BY ID (Authenticated users)
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
-
-        Optional<User> userOpt = userService.getUserById(id);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(UserMappers.toUserResponseDTO(userOpt.get()));
-    }
-
-    // -----------------------------------------------------
-    // ✔ UPDATE USER
-    // -----------------------------------------------------
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(
-            @PathVariable Long id,
-            @Valid @RequestBody UserUpdateDTO dto
-    ) {
-        Optional<User> userOpt = userService.getUserById(id);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        User user = userOpt.get();
-        UserMappers.updateUserFromDTO(dto, user);
-        userService.saveUser(user);
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         return ResponseEntity.ok(UserMappers.toUserResponseDTO(user));
     }
 
-    // -----------------------------------------------------
-    // ✔ DELETE USER
-    // -----------------------------------------------------
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    // UPDATE USER (Authenticated users can update their own profile)
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserUpdateDTO dto
+    ) {
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
-        Optional<User> userOpt = userService.getUserById(id);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        // Hash password if it's being updated
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
-        userService.deleteUser(id);
-        return ResponseEntity.ok("User deleted successfully");
+        UserMappers.updateUserFromDTO(dto, user);
+        User updatedUser = userService.saveUser(user);
+
+        return ResponseEntity.ok(UserMappers.toUserResponseDTO(updatedUser));
     }
 
-    // -----------------------------------------------------
-    // ✔ CHECK EMAIL EXISTS
-    // -----------------------------------------------------
+    // DELETE USER (Admin only)
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+
+        userService.deleteUser(id);
+
+        return ResponseEntity.ok()
+                .body(java.util.Map.of(
+                        "success", true,
+                        "message", "User deleted successfully"
+                ));
+    }
+
+    // CHECK EMAIL EXISTS (Public)
     @GetMapping("/exists/email")
-    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+    public ResponseEntity<Boolean> checkEmailExists(@RequestParam String email) {
         return ResponseEntity.ok(userService.existsByEmail(email));
     }
 
-    // -----------------------------------------------------
-    // ✔ CHECK USERNAME EXISTS
-    // -----------------------------------------------------
+    // CHECK USERNAME EXISTS (Public)
     @GetMapping("/exists/username")
-    public ResponseEntity<?> checkUsername(@RequestParam String username) {
+    public ResponseEntity<Boolean> checkUsernameExists(@RequestParam String username) {
         return ResponseEntity.ok(userService.existsByUsername(username));
     }
 }
