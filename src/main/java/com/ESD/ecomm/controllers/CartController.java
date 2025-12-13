@@ -184,7 +184,7 @@ public class CartController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllCarts() {
         List<Cart> carts = cartService.getCartById(0L)
-                .map(c -> Collections.singletonList(c))
+                .map(Collections::singletonList)
                 .orElse(new ArrayList<>());
 
         // Get all users and their carts
@@ -232,48 +232,5 @@ public class CartController {
         }
 
         return ResponseEntity.ok(CartsMappers.toCartResponseDTO(cartOpt.get()));
-    }
-
-    // DELETE CART (Admin only)
-    @DeleteMapping("/{cartId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteCart(@PathVariable Long cartId) {
-        Optional<Cart> cartOpt = cartService.getCartById(cartId);
-
-        if (cartOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Cart not found");
-        }
-
-        cartService.deleteCart(cartId);
-        return ResponseEntity.ok("Cart deleted successfully");
-    }
-
-    // CLEAR SPECIFIC USER'S CART (Admin only)
-    @DeleteMapping("/user/{userId}/clear")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> clearUserCart(@PathVariable Long userId) {
-        Optional<User> userOpt = userService.getUserById(userId);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("User not found");
-        }
-
-        User user = userOpt.get();
-        Optional<Cart> cartOpt = cartService.getCartByUser(user);
-
-        if (cartOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Cart not found");
-        }
-
-        Cart cart = cartOpt.get();
-        cartItemService.deleteItemsByCart(cart);
-        cart.getCartItems().clear();
-        cart.setTotalItems(0);
-        cart.setTotalPrice(BigDecimal.ZERO);
-        cartService.saveCart(cart);
-
-        return ResponseEntity.ok("User's cart cleared successfully");
     }
 }
