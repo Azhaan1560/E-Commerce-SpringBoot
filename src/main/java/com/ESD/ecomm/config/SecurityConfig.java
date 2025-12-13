@@ -28,13 +28,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
 
-                        // PUBLIC ENDPOINTS
+                        // PUBLIC AUTH ENDPOINTS
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/exists/**").permitAll()
+
+                        // SWAGGER (Public)
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -44,19 +47,28 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // CATEGORY ENDPOINTS
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()   // public browsing
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
 
-                        // USER MANAGEMENT (Admin Only)
-                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                        // PRODUCT ENDPOINTS
+                        .requestMatchers(HttpMethod.POST, "/api/products/filter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+
+                        // USER MANAGEMENT (Admin Only
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
 
-                        // ALL OTHER ENDPOINTS REQUIRE AUTHENTICATION
+                        // ANY OTHER REQUEST → AUTH REQUIRED
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

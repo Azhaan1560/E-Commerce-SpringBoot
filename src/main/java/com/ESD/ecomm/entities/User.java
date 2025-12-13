@@ -3,6 +3,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.ESD.ecomm.enums.UserRoles;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="Users",
@@ -36,6 +38,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name="user_role",nullable = false)
     private UserRoles userRole;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAddress> addresses = new ArrayList<>();
 
     @Column(name="first_name",nullable = false,length=50)
     private String firstname;

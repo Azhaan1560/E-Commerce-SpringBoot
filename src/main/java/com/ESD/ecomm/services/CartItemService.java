@@ -3,12 +3,14 @@ import com.ESD.ecomm.entities.Cart;
 import com.ESD.ecomm.entities.Cart_Items;
 import com.ESD.ecomm.entities.Product;
 import com.ESD.ecomm.repositories.CartItemRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class CartItemService {
 
     private final CartItemRepository cartItemRepository;

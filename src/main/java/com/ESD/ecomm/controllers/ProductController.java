@@ -11,6 +11,7 @@ import com.ESD.ecomm.mappers.ProductMappers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -33,12 +34,10 @@ public class ProductController {
         this.productTagsService = productTagsService;
     }
 
-    // -----------------------------------------------------
-    // ✔ CREATE PRODUCT
-    // -----------------------------------------------------
+    //CREATE PRODUCT (Admin only)
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createProduct(@Valid @RequestBody ProductRequestDTO dto) {
-
         Optional<Category> categoryOpt = categoryService.getCategoryById(dto.getCategoryId());
         if (categoryOpt.isEmpty()) return ResponseEntity.badRequest().body("Invalid Category ID");
 
@@ -55,32 +54,9 @@ public class ProductController {
         return ResponseEntity.ok(ProductMappers.toProductResponseDTO(product));
     }
 
-    // -----------------------------------------------------
-    // ✔ GET ALL PRODUCTS
-    // -----------------------------------------------------
-    @GetMapping
-    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        List<ProductResponseDTO> products = productService.getAllProducts()
-                .stream()
-                .map(ProductMappers::toProductResponseDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(products);
-    }
-
-    // -----------------------------------------------------
-    // ✔ GET PRODUCT BY ID
-    // -----------------------------------------------------
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable Long id) {
-        return productService.getProductById(id)
-                .map(product -> ResponseEntity.ok(ProductMappers.toProductResponseDTO(product)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // -----------------------------------------------------
-    // ✔ UPDATE PRODUCT
-    // -----------------------------------------------------
+    //UPDATE PRODUCT (Admin only)
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateProduct(@PathVariable Long id,
                                            @Valid @RequestBody ProductUpdateDTO dto) {
         Optional<Product> productOpt = productService.getProductById(id);
@@ -90,8 +66,7 @@ public class ProductController {
 
         Category category = null;
         if (dto.getCategoryId() != null) {
-            category = categoryService.getCategoryById(dto.getCategoryId())
-                    .orElse(null);
+            category = categoryService.getCategoryById(dto.getCategoryId()).orElse(null);
         }
 
         List<Product_Tags> tags = null;
@@ -108,21 +83,35 @@ public class ProductController {
         return ResponseEntity.ok(ProductMappers.toProductResponseDTO(product));
     }
 
-    // -----------------------------------------------------
-    // ✔ DELETE PRODUCT
-    // -----------------------------------------------------
+    // DELETE PRODUCT (Admin only)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok("Product deleted successfully");
     }
 
-    // -----------------------------------------------------
-    // ✔ FILTER / SEARCH PRODUCTS
-    // -----------------------------------------------------
+    // GET ALL PRODUCTS
+    @GetMapping
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+        List<ProductResponseDTO> products = productService.getAllProducts()
+                .stream()
+                .map(ProductMappers::toProductResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(products);
+    }
+
+    // GET PRODUCT BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
+        return productService.getProductById(id)
+                .map(product -> ResponseEntity.ok(ProductMappers.toProductResponseDTO(product)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // FILTER / SEARCH PRODUCTS (Optional auth)
     @PostMapping("/filter")
     public ResponseEntity<List<ProductResponseDTO>> filterProducts(@RequestBody ProductFilterDTO filter) {
-
         List<Product> products = productService.getAllProducts();
 
         // Filter by category
