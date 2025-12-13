@@ -36,8 +36,19 @@ public class AuthController {
 
     // REGISTER NEW USER
     @PostMapping("/register")
-    @Operation(summary = "Register new user", description = "Create a new user account and return JWT token")
-    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDTO dto) {
+    @Operation(
+            summary = "Register new user", 
+            description = "Create a new user account with email verification and return JWT authentication token. This is a public endpoint that doesn't require authentication."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User successfully registered",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":true,\"message\":\"User registered successfully\",\"token\":\"eyJhbGciOiJIUzI1NiJ9...\",\"user\":{\"id\":1,\"username\":\"john_doe\",\"email\":\"john@example.com\"}}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bad request - Email or username already exists",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":false,\"message\":\"Email already exists\"}")))
+    })
+    public ResponseEntity<?> register(
+            @io.swagger.v3.oas.annotations.Parameter(description = "User registration information", required = true)
+            @Valid @RequestBody UserRegistrationDTO dto) {
 
         // Check if email already exists
         if (userService.existsByEmail(dto.getEmail())) {
@@ -71,8 +82,21 @@ public class AuthController {
 
     // LOGIN USER
     @PostMapping("/login")
-    @Operation(summary = "User login", description = "Authenticate user and return JWT token")
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO dto) {
+    @Operation(
+            summary = "User authentication", 
+            description = "Authenticate user credentials and return JWT token for accessing protected endpoints. Use the returned token in Authorization header as 'Bearer <token>'."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login successful",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":true,\"message\":\"Login successful\",\"token\":\"eyJhbGciOiJIUzI1NiJ9...\",\"user\":{\"id\":1,\"username\":\"john_doe\",\"email\":\"john@example.com\"}}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":false,\"message\":\"Invalid email or password\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Account inactive",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":false,\"message\":\"Account is inactive. Please contact support.\"}")))
+    })
+    public ResponseEntity<?> login(
+            @io.swagger.v3.oas.annotations.Parameter(description = "User login credentials", required = true)
+            @Valid @RequestBody UserLoginDTO dto) {
 
         // Find user by email
         Optional<User> userOpt = userService.getUserByEmail(dto.getEmail());
@@ -108,8 +132,22 @@ public class AuthController {
 
     // VERIFY TOKEN
     @GetMapping("/verify")
-    @Operation(summary = "Verify JWT token", description = "Check if the provided JWT token is valid")
-    public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String authHeader) {
+    @Operation(
+            summary = "Verify JWT token", 
+            description = "Validate JWT token and return user information if token is valid. Useful for checking token expiry and user details.",
+            security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "Bearer Authentication")
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Token is valid",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":true,\"message\":\"Token is valid\",\"user\":{\"id\":1,\"username\":\"john_doe\",\"email\":\"john@example.com\"}}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bad request - Invalid token format",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":false,\"message\":\"Invalid token format. Use 'Bearer <token>'\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or expired token",
+                    content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(example = "{\"success\":false,\"message\":\"Invalid or expired token\"}")))
+    })
+    public ResponseEntity<?> verifyToken(
+            @io.swagger.v3.oas.annotations.Parameter(description = "JWT token in Authorization header", required = true, example = "Bearer eyJhbGciOiJIUzI1NiJ9...")
+            @RequestHeader("Authorization") String authHeader) {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity

@@ -10,15 +10,34 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-# JWT Configuration
-  jwt:
-    secret: mySecretKeyForJWTTokenGenerationAndValidation123456789
-    expiration: 86400000  # 24 hours in milliseconds
-    issuer: ESD-Ecomm
 
-  # Logging Configuration
-  logging:
-    level:
-      com.ESD.ecomm: DEBUG
-      org.springframework.security: DEBUG
-      org.hibernate.SQL: DEBUG
+# JWT Configuration
+jwt:
+  secret: mySecretKeyForJWTTokenGenerationAndValidation123456789
+  expiration: 86400000  # 24 hours in milliseconds
+  issuer: ESD-Ecomm
+
+# Logging Configuration
+logging:
+  level:
+    com.ESD.ecomm: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: alpha
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+    displayRequestDuration: true
+  show-actuator: true
+  group-configs:
+    - group: 'e-commerce-api'
+      display-name: 'E-Commerce API'
+      paths-to-match: '/api/**'

@@ -40,6 +40,7 @@ public class User {
     private UserRoles userRole;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<UserAddress> addresses = new ArrayList<>();
 
     @Column(name="first_name",nullable = false,length=50)
@@ -52,9 +53,11 @@ public class User {
     private String phoneNumber;
 
     @Column(name="is_active")
+    @Builder.Default
     private boolean active=true; // Default values set in Java to ensure new User objects have proper initial state
                                    //Otherwise NULL will be sent to DB which will cause issue when creating new users
     @Column(name="is_email_verified")
+    @Builder.Default
     private boolean emailVerified=false;
 
     @Column(name="created_at")
